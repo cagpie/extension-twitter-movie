@@ -1,0 +1,30 @@
+{
+  "name": "Twitter動画を最高画質で",
+  "short_name": "twimovricher",
+  "description": "Twitterの動画を常に高画質で閲覧するブラウザ拡張",
+  "applications": {
+    "gecko": {
+      "id": "cagpie@gmail.com",
+      "strict_min_version": "42.0"
+    }
+  },
+  "version": "0.1.0",
+  "manifest_version": 2,
+  "default_locale": "en",
+  "icons": {
+    "16": "images/icon-16.png",
+    "48": "images/icon-48.png",
+    "128": "images/icon-128.png"
+  },
+  "background": {
+    "scripts": [
+      "scripts/background.js"
+    ]
+  },
+  "permissions": [
+    "webRequest",
+    "webRequestBlocking",
+    "https://twitter.com/",
+    "https://video.twimg.com/"
+  ]
+}
