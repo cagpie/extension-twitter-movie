@@ -15,7 +15,7 @@ function getPackFileType () {
   }
 }
 
-gulp.task('pack', ['build'], () => {
+gulp.task('pack', gulp.task('build'), () => {
   let name = packageDetails.name
   let version = packageDetails.version
   let filetype = getPackFileType()

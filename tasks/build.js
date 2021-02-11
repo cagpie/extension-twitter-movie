@@ -1,8 +1,8 @@
 import gulp from 'gulp'
-import gulpSequence from 'gulp-sequence'
 
-gulp.task('build', gulpSequence(
-  'clean', [
+gulp.task('build', gulp.series(
+  'clean',
+  gulp.parallel(
     'manifest',
     'scripts',
     'styles',
@@ -11,5 +11,5 @@ gulp.task('build', gulpSequence(
     'images',
     'fonts',
     'chromereload'
-  ]
+  )
 ))
