@@ -21,7 +21,11 @@
       "scripts/background.js"
     ]
   },
+  "options_ui": {
+    "page": "pages/options.html"
+  },
   "permissions": [
+    "storage",
     "webRequest",
     "webRequestBlocking",
     "https://twitter.com/",

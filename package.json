@@ -11,6 +11,7 @@
     "build:opera": "gulp pack --production --vendor=opera",
     "build:edge": "gulp pack --production --vendor=edge",
     "dev": "npm run dev:chrome",
+    "dev2": "npm run dev:firefox",
     "dev:chrome": "gulp --watch --vendor=chrome",
     "dev:firefox": "gulp --watch --vendor=firefox",
     "dev:opera": "gulp --watch --vendor=opera",
