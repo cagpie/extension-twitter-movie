@@ -61,7 +61,7 @@ if (isFirefox) {
             default:
               // そこそこ画質があればそれを選択
               for (let i = 2; i < splittedBody.length; i += 2) {
-                if (Number(splittedBody[i].match(/BANDWIDTH=(\d+)/)[1]) > 800000) {
+                if (Number(splittedBody[i].match(/BANDWIDTH=(\d+)/)[1]) > 8) {
                   bodyLines = [...splittedBody.slice(i, i + 2), '\n']
                   break
                 }
