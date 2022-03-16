@@ -6,19 +6,19 @@ const storedUrl = {};
 // 設定初期化
 let qualitySetting = 2
 if (isFirefox) {
-  browser.storage.sync.get('quality')
+  browser.storage.sync.get('quality_v2')
     .then((result) => {
-      qualitySetting = (result && result.quality) ? Number(result.quality) : 2
+      qualitySetting = (result && result.quality_v2) ? Number(result.quality_v2) : 2
     })
 } else {
-  chrome.storage.sync.get('quality', (result) => {
-    qualitySetting = (result && result.quality) ? Number(result.quality) : 2
+  chrome.storage.sync.get('quality_v2', (result) => {
+    qualitySetting = (result && result.quality_v2) ? Number(result.quality_v2) : 2
   })
 }
 
 // 設定変更検知
 (isFirefox ? browser : chrome).storage.onChanged.addListener((result) => {
-  qualitySetting = Number(result.quality.newValue)
+  qualitySetting = Number(result.quality_v2.newValue)
 })
 
 // 本編
@@ -44,32 +44,42 @@ if (isFirefox) {
             return
           }
 
+          // EXT-X-STREAM-INFの情報とプレイリストのURLの紐付けを行う
           const splittedBody = body.split('\n')
-
-          // 最初の２行をヘッダ、それ移行の２行ずつをプレイリスト情報として扱う
-          const headerLines = splittedBody.slice(0, 2)
+          const headerLines = []
           let bodyLines = []
+          const playlists = {}
+          let headerFlag = true
+          for (let i = 0; i < splittedBody.length; i++) {
+            if (!/^#EXT-X-STREAM-INF/.test(splittedBody[i])) {
+              if (headerFlag) {
+                headerLines.push(splittedBody[i])
+              }
+              continue
+            }
+
+            headerFlag = false
+
+            playlists[splittedBody[i].match(/BANDWIDTH=(\d+)/)[1]] = [splittedBody[i], splittedBody[i + 1]]
+            i++
+          }
 
           switch (qualitySetting) {
             // 最高画質の場合
             case 2:
-              bodyLines = splittedBody.slice(-3)
+              bodyLines = playlists[Math.max(...Object.keys(playlists))]
               break
 
             // そこそこ画質の場合
             case 3:
             default:
-              // そこそこ画質があればそれを選択
-              for (let i = 2; i < splittedBody.length; i += 2) {
-                if (Number(splittedBody[i].match(/BANDWIDTH=(\d+)/)[1]) > 800000) {
-                  bodyLines = [...splittedBody.slice(i, i + 2), '\n']
-                  break
-                }
+              const keys = Object.keys(playlists)
+              // 3個以上要素があれば一番高画質のものを除去してその中から一番いいものを選択する
+              if (keys.length > 2) {
+                delete playlists[Math.max(...keys)]
               }
-              // なければ一番画質いいものを選択
-              if (!bodyLines.length) {
-                bodyLines = splittedBody.slice(-3)
-              }
+              bodyLines = playlists[Math.max(...Object.keys(playlists))]
+              break
           }
 
           const str = headerLines.join('\n') + '\n' + bodyLines.join('\n')
@@ -103,27 +113,33 @@ if (isFirefox) {
                 return
               }
 
-              const splittedBody= body.split('\n')
+              // EXT-X-STREAM-INFの情報とプレイリストのURLの紐付けを行う
+              const splittedBody = body.split('\n')
+              const playlists = {}
+              for (let i = 0; i < splittedBody.length; i++) {
+                if (!/^#EXT-X-STREAM-INF/.test(splittedBody[i])) {
+                  continue
+                }
+                playlists[splittedBody[i].match(/BANDWIDTH=(\d+)/)[1]] = splittedBody[i + 1]
+                i++
+              }
+
               switch (qualitySetting) {
                 // 最高画質の場合
                 case 2:
-                  storedUrl[id] = splittedBody[splittedBody.length - 2]
+                  storedUrl[id] = playlists[Math.max(...Object.keys(playlists))]
                   break
 
                 // そこそこ画質の場合
                 case 3:
                 default:
-                  // そこそこ画質があればそれを選択
-                  for (let i = 2; i < splittedBody.length; i += 2) {
-                    if (Number(splittedBody[i].match(/BANDWIDTH=(\d+)/)[1]) > 800000) {
-                      storedUrl[id] = splittedBody[i + 1]
-                      break
-                    }
+                  const keys = Object.keys(playlists)
+                  // 3個以上要素があれば一番高画質のものを除去してその中から一番いいものを選択する
+                  if (keys.length > 2) {
+                    delete playlists[Math.max(...keys)]
                   }
-                  // なければ一番画質いいものを選択
-                  if (!storedUrl[id]) {
-                    storedUrl[id] = splittedBody[splittedBody.length - 2]
-                  }
+                  storedUrl[id] = playlists[Math.max(...Object.keys(playlists))]
+                  break
               }
             })
           }

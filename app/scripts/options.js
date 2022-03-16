@@ -6,13 +6,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 設定読み込み
   if (isFirefox) {
-    browser.storage.sync.get('quality')
+    browser.storage.sync.get('quality_v2')
       .then((result) => {
-        qualityRadioEls.value = result.quality || 2
+        qualityRadioEls.value = result.quality_v2 || 2
       })
   } else {
-    chrome.storage.sync.get('quality', (result) => {
-      qualityRadioEls.value = result.quality || 2
+    chrome.storage.sync.get('quality_v2', (result) => {
+      qualityRadioEls.value = result.quality_v2 || 2
     })
   }
 
@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   Array.from(qualityRadioEls).forEach((el) => {
     el.addEventListener('change', () => {
       (isFirefox ? browser : chrome).storage.sync.set({
-        quality: Number(qualityRadioEls.value)
+        quality_v2: Number(qualityRadioEls.value)
       });
     })
   })
